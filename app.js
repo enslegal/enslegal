@@ -1,13 +1,16 @@
 (()=>{
 const C=window.ESL, $=s=>document.querySelector(s);
-const el=(t,p={},...k)=>{const e=Object.assign(document.createElement(t),p);k.flat().forEach(c=>e.append(c));return e};
+const el=(t,p={},...k)=>{const {dataset,...rest}=p;const e=Object.assign(document.createElement(t),rest);if(dataset)Object.assign(e.dataset,dataset);k.flat().forEach(c=>e.append(c));return e};
 document.querySelectorAll('[data-discord]').forEach(a=>{a.href=C.discord;a.rel="noopener"});
 const page=document.body.dataset.page;
 
 async function team(){
   const root=$('#team');
   try{
-    const roles=(await (await fetch("team.json",{cache:"no-store"})).json()).roles||[];
+    const res=await fetch("team.json",{cache:"no-store"});
+    if(!res.ok)throw new Error("team.json was not found (HTTP "+res.status+"). It must be in the same folder as index.html.");
+    let data;try{data=await res.json()}catch(x){throw new Error("team.json has a syntax error: "+x.message)}
+    const roles=(data.roles||[]).map(r=>({...r,members:r.members||[]}));
     root.replaceChildren();const chips=$('#chips');
     if(!roles.some(r=>r.members&&r.members.length)){root.append(el('div',{className:'note'},"No team members have been added yet."));return}
     roles.filter(r=>r.members.length).forEach((r,i)=>{
@@ -24,7 +27,7 @@ async function team(){
       document.querySelectorAll('.person').forEach(p=>p.hidden=!p.dataset.n.includes(v));
       document.querySelectorAll('.role').forEach(s=>s.hidden=!s.querySelector('.person:not([hidden])'));
     });
-  }catch(e){root.replaceChildren(el('div',{className:'note'},"We couldn't load the team list. Refresh the page or check team.json for a typo."))}
+  }catch(e){root.replaceChildren(el('div',{className:'note'},"We couldn't load the team list. "+e.message))}
 }
 
 async function jobs(){
