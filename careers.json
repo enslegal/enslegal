@@ -3,11 +3,31 @@
     "id": "paralegal",
     "title": "Paralegal",
     "description": "Support our lawyers by preparing documents, researching the nation's laws and helping clients through their cases.",
-    "requirements": ["Active in the France roleplay nation", "Able to join a Discord call when needed", "Clear, professional writing"],
+    "requirements": [
+      "Active in the France roleplay nation",
+      "Able to join a Discord call when needed",
+      "Clear, professional writing"
+    ],
     "questions": [
-      {"label": "Why do you want to join E&S Legal?", "type": "long", "required": true},
-      {"label": "How many hours a week can you be active?", "type": "short", "required": true},
-      {"label": "Do you have previous law firm experience?", "type": "choice", "options": ["Yes", "No"], "required": true}
+      {
+        "label": "Why do you want to join E&S Legal?",
+        "type": "long",
+        "required": true
+      },
+      {
+        "label": "How many hours a week can you be active?",
+        "type": "short",
+        "required": true
+      },
+      {
+        "label": "Do you have previous law firm experience?",
+        "type": "choice",
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "required": true
+      }
     ]
   }
 ]
