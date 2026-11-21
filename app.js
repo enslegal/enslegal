@@ -7,18 +7,21 @@ const page=document.body.dataset.page;
 async function team(){
   const G="https://groups.roproxy.com/v1/groups/"+C.groupId, T="https://thumbnails.roproxy.com/v1/users/avatar-headshot";
   const root=$('#team');
-  try{
+  async function live(){
     const roles=(await (await fetch(G+"/roles")).json()).roles.filter(r=>r.rank>=C.minRank).sort((a,b)=>b.rank-a.rank);
-    for(const r of roles){
-      r.users=[];let cur="";
+    for(const r of roles){r.users=[];let cur="";
       do{const d=await (await fetch(`${G}/roles/${r.id}/users?limit=100&sortOrder=Asc${cur?"&cursor="+cur:""}`)).json();
-        r.users.push(...d.data);cur=d.nextPageCursor||""}while(cur);
-    }
-    const all=roles.flatMap(r=>r.users), img={};
-    for(let i=0;i<all.length;i+=100){
-      const ids=all.slice(i,i+100).map(u=>u.userId).join(",");
-      (await (await fetch(`${T}?userIds=${ids}&size=150x150&format=Png&isCircular=false`)).json()).data.forEach(x=>img[x.targetId]=x.imageUrl);
-    }
+        r.users.push(...d.data);cur=d.nextPageCursor||""}while(cur)}
+    const all=roles.flatMap(r=>r.users),img={};
+    for(let i=0;i<all.length;i+=100){const ids=all.slice(i,i+100).map(u=>u.userId).join(",");
+      (await (await fetch(`${T}?userIds=${ids}&size=150x150&format=Png&isCircular=false`)).json()).data.forEach(x=>img[x.targetId]=x.imageUrl)}
+    roles.forEach(r=>r.users.forEach(u=>u.img=img[u.userId]||""));
+    return roles;
+  }
+  try{
+    let roles=[];
+    try{roles=(await (await fetch("team.json",{cache:"no-cache"})).json()).roles||[]}catch(_){}
+    if(!roles.length)roles=await live();
     root.replaceChildren();const chips=$('#chips');
     roles.filter(r=>r.users.length).forEach(r=>{
       const id="r"+r.id;
@@ -26,7 +29,7 @@ async function team(){
       root.append(el('div',{className:'role',id},
         el('h2',{},r.name,el('small',{textContent:r.users.length})),
         el('div',{className:'grid'},r.users.map(u=>el('a',{className:'person',href:"https://www.roblox.com/users/"+u.userId+"/profile",rel:"noopener",dataset:{n:u.username.toLowerCase()}},
-          el('img',{src:img[u.userId]||"",alt:"",loading:"lazy",width:96,height:96}),u.username)))));
+          el('img',{src:u.img||"",alt:"",loading:"lazy",width:96,height:96}),u.username)))));
     });
     $('#q').addEventListener('input',e=>{
       const v=e.target.value.trim().toLowerCase();
@@ -48,17 +51,18 @@ async function jobs(){
 }
 
 function job(j){
-  const body=el('div',{className:'body',id:'b-'+j.id},
+  const inner=el('div',{className:'inner'},
     el('p',{textContent:j.description}),el('h3',{textContent:'Requirements'}),
     el('ul',{},j.requirements.map(r=>el('li',{textContent:r}))));
+  const body=el('div',{className:'body',id:'b-'+j.id},inner);
   const btn=el('button',{type:'button',textContent:j.title,ariaExpanded:'false'});
   btn.setAttribute('aria-controls',body.id);
   const box=el('article',{className:'job'},btn,body);
   btn.onclick=()=>{const o=box.classList.toggle('open');btn.setAttribute('aria-expanded',o)};
   const apply=el('button',{type:'button',className:'btn',textContent:'Apply for this position'});
   let form=null;
-  apply.onclick=()=>{if(!form){form=makeForm(j);body.append(form)}form.hidden=!form.hidden;if(!form.hidden)form.querySelector('input').focus()};
-  body.append(apply);return box;
+  apply.onclick=()=>{if(!form){form=makeForm(j);inner.append(form)}form.hidden=!form.hidden;if(!form.hidden)form.querySelector('input').focus()};
+  inner.append(apply);return box;
 }
 
 function makeForm(j){
