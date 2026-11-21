@@ -4,6 +4,21 @@ const el=(t,p={},...k)=>{const {dataset,...rest}=p;const e=Object.assign(documen
 document.querySelectorAll('[data-discord]').forEach(a=>{a.href=C.discord;a.rel="noopener"});
 const page=document.body.dataset.page;
 
+async function headshots(ids){
+  for(const base of ["https://thumbnails.roblox.com","https://thumbnails.roproxy.com"]){
+    try{
+      const out={};
+      for(let i=0;i<ids.length;i+=100){
+        const r=await fetch(`${base}/v1/users/avatar-headshot?userIds=${ids.slice(i,i+100).join(",")}&size=150x150&format=Png&isCircular=false`);
+        if(!r.ok)throw 0;
+        (await r.json()).data.forEach(x=>{if(x.imageUrl)out[x.targetId]=x.imageUrl});
+      }
+      if(Object.keys(out).length)return out;
+    }catch(_){}
+  }
+  return {};
+}
+
 async function team(){
   const root=$('#team');
   try{
@@ -19,9 +34,10 @@ async function team(){
       root.append(el('div',{className:'role',id},
         el('h2',{},r.name,el('small',{textContent:r.members.length})),
         el('div',{className:'grid'},r.members.map(m=>el('a',{className:'person',href:"https://www.roblox.com/users/"+m.id+"/profile",rel:"noopener",dataset:{n:(m.username+" "+(m.discord||"")).toLowerCase()}},
-          el('img',{src:"https://www.roblox.com/headshot-thumbnail/image?userId="+m.id+"&width=150&height=150&format=png",alt:"",loading:"lazy",width:96,height:96}),
+          el('img',{src:"https://www.roblox.com/headshot-thumbnail/image?userId="+m.id+"&width=150&height=150&format=png",alt:"",loading:"lazy",width:96,height:96,referrerPolicy:"no-referrer",dataset:{id:m.id}}),
           m.username,m.discord?el('small',{textContent:"Discord: "+m.discord}):"")))));
     });
+    headshots([...new Set(roles.flatMap(r=>r.members.map(m=>m.id)))]).then(map=>document.querySelectorAll('.person img').forEach(i=>{if(map[i.dataset.id])i.src=map[i.dataset.id]}));
     $('#q').addEventListener('input',e=>{
       const v=e.target.value.trim().toLowerCase();
       document.querySelectorAll('.person').forEach(p=>p.hidden=!p.dataset.n.includes(v));
