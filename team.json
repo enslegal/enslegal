@@ -1,17 +1,11 @@
 {
   "roles": [
     {
-      "name": "Board of Directors",
+      "name": "Founding Partners",
       "members": [
-        { "id": 1, "username": "RobloxUsername", "discord": "discordname" },
-        { "id": 2, "username": "AnotherUser", "discord": "anotherdiscord" }
+        { "id": 1, "username": "Endormicus", "discord": "endormant" },
+        { "id": 2, "username": "Satexm", "discord": "satexm" }
       ]
     },
-    {
-      "name": "Senior Lawyer",
-      "members": [
-        { "id": 3, "username": "ThirdUser", "discord": "thirddiscord" }
-      ]
-    }
   ]
 }
