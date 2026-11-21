@@ -1,6 +1,6 @@
 window.ESL = {
-  discord: "https://discord.gg/YOUR-INVITE",   // your Discord invite link
-  webhook: "",                                  // Discord webhook URL for applications
-  groupId: 189086348,
-  minRank: 1                                    // hide roles below this rank (0 = guest/non-staff)
+  discord: "https://discord.gg/sVFeZm8r5c",
+  webhook: "",   // Discord webhook URL for applications
+  repo: "",      // "username/repository", only needed if the admin page can't work it out
+  branch: "main"
 };

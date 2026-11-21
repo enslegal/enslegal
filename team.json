@@ -1,1 +1,17 @@
-
+{
+  "roles": [
+    {
+      "name": "Board of Directors",
+      "members": [
+        { "id": 1, "username": "RobloxUsername", "discord": "discordname" },
+        { "id": 2, "username": "AnotherUser", "discord": "anotherdiscord" }
+      ]
+    },
+    {
+      "name": "Senior Lawyer",
+      "members": [
+        { "id": 3, "username": "ThirdUser", "discord": "thirddiscord" }
+      ]
+    }
+  ]
+}

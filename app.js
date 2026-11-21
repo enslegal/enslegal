@@ -5,40 +5,26 @@ document.querySelectorAll('[data-discord]').forEach(a=>{a.href=C.discord;a.rel="
 const page=document.body.dataset.page;
 
 async function team(){
-  const G="https://groups.roproxy.com/v1/groups/"+C.groupId, T="https://thumbnails.roproxy.com/v1/users/avatar-headshot";
   const root=$('#team');
-  async function live(){
-    const roles=(await (await fetch(G+"/roles")).json()).roles.filter(r=>r.rank>=C.minRank).sort((a,b)=>b.rank-a.rank);
-    for(const r of roles){r.users=[];let cur="";
-      do{const d=await (await fetch(`${G}/roles/${r.id}/users?limit=100&sortOrder=Asc${cur?"&cursor="+cur:""}`)).json();
-        r.users.push(...d.data);cur=d.nextPageCursor||""}while(cur)}
-    const all=roles.flatMap(r=>r.users),img={};
-    for(let i=0;i<all.length;i+=100){const ids=all.slice(i,i+100).map(u=>u.userId).join(",");
-      (await (await fetch(`${T}?userIds=${ids}&size=150x150&format=Png&isCircular=false`)).json()).data.forEach(x=>img[x.targetId]=x.imageUrl)}
-    roles.forEach(r=>r.users.forEach(u=>u.img=img[u.userId]||""));
-    return roles;
-  }
   try{
-    let roles=[];
-    try{roles=(await (await fetch("team.json",{cache:"no-cache"})).json()).roles||[]}catch(_){}
-    if(!roles.length)roles=await live();
+    const roles=(await (await fetch("team.json",{cache:"no-store"})).json()).roles||[];
     root.replaceChildren();const chips=$('#chips');
-    roles.filter(r=>r.users.length).forEach(r=>{
-      const id="r"+r.id;
+    if(!roles.some(r=>r.members&&r.members.length)){root.append(el('div',{className:'note'},"No team members have been added yet."));return}
+    roles.filter(r=>r.members.length).forEach((r,i)=>{
+      const id="r"+i;
       chips.append(el('a',{href:"#"+id,textContent:r.name}));
       root.append(el('div',{className:'role',id},
-        el('h2',{},r.name,el('small',{textContent:r.users.length})),
-        el('div',{className:'grid'},r.users.map(u=>el('a',{className:'person',href:"https://www.roblox.com/users/"+u.userId+"/profile",rel:"noopener",dataset:{n:u.username.toLowerCase()}},
-          el('img',{src:u.img||"",alt:"",loading:"lazy",width:96,height:96}),u.username)))));
+        el('h2',{},r.name,el('small',{textContent:r.members.length})),
+        el('div',{className:'grid'},r.members.map(m=>el('a',{className:'person',href:"https://www.roblox.com/users/"+m.id+"/profile",rel:"noopener",dataset:{n:(m.username+" "+(m.discord||"")).toLowerCase()}},
+          el('img',{src:"https://www.roblox.com/headshot-thumbnail/image?userId="+m.id+"&width=150&height=150&format=png",alt:"",loading:"lazy",width:96,height:96}),
+          m.username,m.discord?el('small',{textContent:"Discord: "+m.discord}):"")))));
     });
     $('#q').addEventListener('input',e=>{
       const v=e.target.value.trim().toLowerCase();
       document.querySelectorAll('.person').forEach(p=>p.hidden=!p.dataset.n.includes(v));
       document.querySelectorAll('.role').forEach(s=>s.hidden=!s.querySelector('.person:not([hidden])'));
     });
-  }catch(e){
-    root.replaceChildren(el('div',{className:'note'},"We couldn't load the team list. ",el('a',{href:"https://www.roblox.com/communities/"+C.groupId+"/E-S-Legal#!/about",textContent:"View it on our Roblox group."})));
-  }
+  }catch(e){root.replaceChildren(el('div',{className:'note'},"We couldn't load the team list. Refresh the page or check team.json for a typo."))}
 }
 
 async function jobs(){
